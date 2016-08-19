@@ -1,22 +1,5 @@
 builddir=.
 
-ifneq (,$(wildcard /usr/share/apache2/build/special.mk))
-  top_srcdir=/usr/share/apache2
-  top_builddir=/usr/share/apache2
-  include /usr/share/apache2/build/special.mk
-endif
-ifneq (,$(wildcard /usr/lib64/httpd/build/special.mk))
-  top_srcdir=/etc/httpd
-  top_builddir=/usr/lib64/httpd
-  include /usr/lib64/httpd/build/special.mk
-endif
-ifneq (,$(wildcard /etc/debian_version))
-  DISTRIBUTION := $(shell lsb_release -i | cut -f2)
-  ifeq ($(DISTRIBUTION),Debian)
-  DEFS=-DWITH_APACHE22
-  endif
-endif
-
 #   the used tools
 APXS=apxs
 APACHECTL=apachectl
@@ -24,15 +7,24 @@ APACHECTL=apachectl
 #   additional defines, includes and libraries
 LIBS=-ljson-c -lz
 
+# Source
+FILES=mod_log_gelf.c mod_log_gelf.h functions.c functions.h functions20.h apache20.h
+
 #   the default target
-all: local-shared-build
+all: mod_log_gelf
+
+
+mod_log_gelf: $(FILES)
+	$(APXS) $(LIBS) -c $(FILES)  
+	
 
 #   install the shared object file into Apache 
-install: install-modules-yes
+install: mod_log_gelf.la
+	$(APXS) $(LIBS) -c -i $(FILES)
 
 #   cleanup
 clean:
-	-rm -f mod_log_gelf.o mod_log_gelf.lo mod_log_gelf.slo mod_log_gelf.la 
+	-rm -f mod_log_gelf.o functions.o functions.lo functions.slo mod_log_gelf.lo mod_log_gelf.slo mod_log_gelf.la 
 
 #   simple test
 test: reload

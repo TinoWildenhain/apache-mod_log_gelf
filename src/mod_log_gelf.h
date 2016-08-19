@@ -1,3 +1,9 @@
+#ifndef MOD_LOG_GELF_H
+#define MOD_LOG_GELF_H
+
+#include <json-c/json.h>
+#include "apache20.h"
+
 typedef json_object* item_func(request_rec *r, char *a);
 typedef struct transferDataS {
     void * data;
@@ -15,3 +21,5 @@ void log_gelf_send_message_udp(const transferData* payload, request_rec *request
 void log_gelf_send_message_tcp(const transferData* payload, request_rec *request);
 
 double log_gelf_get_timestamp();
+
+#endif /* MOD_LOG_GELF_H */
